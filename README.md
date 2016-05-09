@@ -17,7 +17,7 @@ mapboxRegion (requires mapBoxIncludeAPI):
      - "Height"     : map height  (px, auto.. css value)
      - "initalView" : json object for inital position - {x:45.793533,y:16.004514,zoomLevel:9}
    - Events:
-     - mapBoxMap change zoomLevel [mapBoxRegion] - after zoom level chnage
+     - mapBoxMap change zoomLevel [mapBoxRegion] - after current zoom level chnage
      - mapBoxMap change bbox [mapBoxRegion]      - after current bbox change 
    - access in js console: apex.plugins.mapbox.map
    
