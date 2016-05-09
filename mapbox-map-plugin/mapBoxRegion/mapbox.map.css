@@ -1,0 +1,15 @@
+.leaflet-bottom, .leaflet-top {
+    position: absolute;
+    z-index: 80;
+    pointer-events: none;
+}
+
+.leaflet-control-container .leaflet-top {
+    position: absolute;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.mapbox-map .t-Region-bodyWrap {
+    height: inherit;
+}

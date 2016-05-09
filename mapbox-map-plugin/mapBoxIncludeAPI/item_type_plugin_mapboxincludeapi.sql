@@ -31,8 +31,9 @@ wwv_flow_api.create_plugin(
  p_id=>wwv_flow_api.id(1870622301243709)
 ,p_plugin_type=>'ITEM TYPE'
 ,p_name=>'MAPBOXINCLUDEAPI'
-,p_display_name=>'mapboxIncludeAPI'
-,p_supported_ui_types=>'DESKTOP'
+,p_display_name=>'mapBoxIncludeAPI'
+,p_supported_ui_types=>'DESKTOP:JQM_SMARTPHONE'
+,p_javascript_file_urls=>'http://playground/ws/mapbox.init.js'
 ,p_render_function=>'apex_plugin_pkg.MAPBOX_INCLUDE'
 ,p_substitute_attributes=>true
 ,p_subscribe_plugin_settings=>true
