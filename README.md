@@ -16,7 +16,7 @@ mapboxRegion:
    - "Width"      : map width   (px, auto.. css value)
    - "Height"     : map height  (px, auto.. css value)
    - "initalView" : json object for inital position - {x:45.793533,y:16.004514,zoomLevel:9}
-    access in js console: apex.plugins.mapbox.map
+   - access in js console: apex.plugins.mapbox.map
 
 example:
     https://apex.oracle.com/pls/apex/f?p=101959:2
