@@ -10,14 +10,17 @@ DOCS:
 mapBoxIncludeAPI:
    - "API key"    : mapbox API key
 
-mapboxRegion:
+mapboxRegion (requires mapBoxIncludeAPI):
    - Attributes:
-   - "Map name"   : name of mapbox map
-   - "Width"      : map width   (px, auto.. css value)
-   - "Height"     : map height  (px, auto.. css value)
-   - "initalView" : json object for inital position - {x:45.793533,y:16.004514,zoomLevel:9}
+     - "Map name"   : name of mapbox map
+     - "Width"      : map width   (px, auto.. css value)
+     - "Height"     : map height  (px, auto.. css value)
+     - "initalView" : json object for inital position - {x:45.793533,y:16.004514,zoomLevel:9}
+   - Events:
+     - mapBoxMap change zoomLevel [mapBoxRegion] - after zoom level chnage
+     - mapBoxMap change bbox [mapBoxRegion]      - after current bbox change 
    - access in js console: apex.plugins.mapbox.map
-
+   
 example:
     https://apex.oracle.com/pls/apex/f?p=101959:2
 

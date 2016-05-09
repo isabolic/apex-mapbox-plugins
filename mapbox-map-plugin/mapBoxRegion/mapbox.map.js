@@ -15,14 +15,36 @@
     };
 
     var triggerEvent =  function(evt, evtData){
-        this.container.trigger(evt, [this]);
+        this.container.trigger(evt, [evtData]);
     };
+    
+    var bboxChangeEvt = function(evt){
+        var bbox     = this.map.getBounds(),
+            bboxJson = {
+                "west" : bbox.getWest(), 
+                "south": bbox.getSouth(),
+                "east" : bbox.getEast(), 
+                "north": bbox.getNorth(),
+                "string": "BBOX(" + this.map.getBounds().toBBoxString() + ")"
+            }
+
+        triggerEvent.apply(this, [evt, bboxJson]);
+    };
+
+    var zoomLlvChangeEvt = function(evt){
+        var lvl = {
+            "zoomLevel": this.map.getZoom()
+        }
+        triggerEvent.apply(this, [evt, lvl]);
+    };
+    
 
     apex.plugins.mapBoxMap = function(opts) {
         this.map = null;
         this.options = {};
         this.container = null;
         this.events = [];
+        this.apexname = "MAPBOXREGION";
         this.init = function() {
 
             if ($.isPlainObject(options)) {
@@ -57,8 +79,8 @@
                 )
             }
 
-            this.map.on("move", triggerEvent.bind(this, "mapboxmap-change-bbox.MAPBOXREGION"));
-            this.map.on("zoomend", triggerEvent.bind(this, "mapboxmap-change-zoomlevel.MAPBOXREGION"));
+            this.map.on("move"   , bboxChangeEvt.bind(this, "mapboxmap-change-bbox." + this.apexname));
+            this.map.on("zoomend", zoomLlvChangeEvt.bind(this, "mapboxmap-change-zoomlevel." + this.apexname));
 
             return this;
         }
