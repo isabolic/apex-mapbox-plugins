@@ -13,3 +13,8 @@
 .mapbox-map .t-Region-bodyWrap {
     height: inherit;
 }
+
+.t-Region.is-maximized>.t-Region-bodyWrap>.t-Region-body.mapbox-map.max-width{
+    width: 100%!important;
+    height: 100%!important;
+}

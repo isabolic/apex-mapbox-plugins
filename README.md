@@ -1,4 +1,4 @@
-Oracle apex plugins for google map API & mapbox API
+Oracle apex plugins for & mapbox API
 - install:
 - compile packages APEX_PLUGIN_PKG
 - run install sql scripts for apex (region_xxx and item_xxx)
@@ -20,6 +20,10 @@ mapboxRegion (requires mapBoxIncludeAPI):
      - mapBoxMap change zoomLevel [mapBoxRegion] - after current zoom level chnage
      - mapBoxMap change bbox [mapBoxRegion]      - after current bbox change 
    - access in js console: apex.plugins.mapbox.map
+
+   CL:
+   mapboxRegion:
+   - supported maximize region - template option
    
 example:
     https://apex.oracle.com/pls/apex/f?p=101959:2
