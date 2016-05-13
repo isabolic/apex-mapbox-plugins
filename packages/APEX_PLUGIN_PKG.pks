@@ -1,5 +1,7 @@
 create or replace package apex_plugin_pkg
 as
+    
+function f_is_playground return boolean;
 
 function MAPBOX_MAP_RENDER (
     p_region              in apex_plugin.t_region,
@@ -14,5 +16,6 @@ function MAPBOX_INCLUDE (
     p_is_readonly         in boolean,
     p_is_printer_friendly in boolean )
     return apex_plugin.t_page_item_render_result;
+
 end apex_plugin_pkg;
 /

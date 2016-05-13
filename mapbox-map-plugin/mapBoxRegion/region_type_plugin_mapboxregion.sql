@@ -102,6 +102,12 @@ wwv_flow_api.create_plugin_event(
 ,p_name=>'mapboxmap-change-zoomlevel'
 ,p_display_name=>'mapBoxMap change zoomLevel'
 );
+wwv_flow_api.create_plugin_event(
+ p_id=>wwv_flow_api.id(2007832288071810)
+,p_plugin_id=>wwv_flow_api.id(1876239888551200)
+,p_name=>'mapboxmap-maximize-region'
+,p_display_name=>'mapBoxMap maximize region'
+);
 end;
 /
 begin

@@ -1,17 +1,17 @@
 create or replace package body apex_plugin_pkg
 as
 
-gv_playground_host varchar2(100) := 'WAR-MAC.local';
+gv_playground_host varchar2(100) := 'PLAYGROUND';
 
 function f_is_playground return boolean
 is 
-v_host_name varchar2(200);
+v_ax_workspace varchar2(200);
 begin
-    select SYS_CONTEXT('USERENV', 'HOST') 
-      into v_host_name 
+    select apex_util.find_workspace((select apex_application.get_security_group_id from dual))
+      into v_ax_workspace 
       from dual;
       
-    if  gv_playground_host = v_host_name then
+    if  gv_playground_host = v_ax_workspace then
         return true;
     else 
         return false;
@@ -41,6 +41,8 @@ function mapbox_map_render (
         if v_region_id is null then
            v_region_id := 'R' ||  p_region.id;
         end if;
+        
+        
         
         if f_is_playground = false then
            apex_javascript.add_library(p_name           => 'mapbox.map',
@@ -99,3 +101,4 @@ function mapbox_include (
 end mapbox_include; 
 
 end apex_plugin_pkg;
+/

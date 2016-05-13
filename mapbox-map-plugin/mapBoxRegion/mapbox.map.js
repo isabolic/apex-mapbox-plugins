@@ -15,10 +15,18 @@
         }
     };
 
+    /**
+     * [triggerEvent     - PRIVATE handler fn - trigger apex events]
+     * @param String evt - apex event name to trigger
+     */
     var triggerEvent = function(evt, evtData) {
         this.container.trigger(evt, [evtData]);
     };
 
+    /**
+     * [resizeMap        - PRIVATE event handler fn -  when map bbox change]
+     * @param String evt - apex event name to trigger
+     */
     var bboxChangeEvt = function(evt) {
         var bbox = this.map.getBounds(),
             bboxJson = {
@@ -32,6 +40,10 @@
         triggerEvent.apply(this, [evt, bboxJson]);
     };
 
+    /**
+     * [zoomLlvChangeEvt - PRIVATE event handler fn - when map zoom level change]
+     * @param String evt - apex event name to trigger
+     */
     var zoomLlvChangeEvt = function(evt) {
         var lvl = {
             "zoomLevel": this.map.getZoom()
@@ -39,12 +51,19 @@
         triggerEvent.apply(this, [evt, lvl]);
     };
 
+    /**
+     * [resizeMap        - PRIVATE event handler fn]
+     * @param String evt - apex event name to trigger
+     */
     var resizeMap = function (evt){
         var o = {
             w:this.region.width(),
             h:this.region.height(),
-        }, timer, bounds = this.map.getBounds();
-    
+        }, 
+        timer, 
+        bounds = this.map.getBounds();
+        
+        // wait until html renders
         timer = setTimeout(function(){
             if(o.w === this.region.width() &&
                o.h === this.region.height()){
@@ -62,8 +81,6 @@
 
             }
         }.bind(this), 100);
-
-        
     };
 
 
@@ -125,11 +142,10 @@
                 )
             }
 
-            this.map.on("move", bboxChangeEvt.bind(this, "mapboxmap-change-bbox." + this.apexname));
+            this.map.on("move"   , bboxChangeEvt.bind(   this, "mapboxmap-change-bbox."      + this.apexname));
             this.map.on("zoomend", zoomLlvChangeEvt.bind(this, "mapboxmap-change-zoomlevel." + this.apexname));
-            
-            this.region.on("click", 'button',
-                resizeMap.bind(this, "mapboxmap-resize-region." + this.apexname));
+            this.region.on("click", 'span.js-maximizeButtonContainer', 
+                           resizeMap.bind(this, "mapboxmap-maximize-region." + this.apexname));
 
             return this;
         }
@@ -137,9 +153,15 @@
         return this.init();
     }
     apex.plugins.mapBoxMap.prototype = {
+        /**
+         * [zoomTo -  API method, zoom to spec. position]
+         * @param   Number  x          x cord.
+         * @param   Number  y          y cord.
+         * @param   Number  zoomLevel zoomLevel
+         */
         zoomTo: function zoomTo(x, y, zoomLevel) {
-            this.map
-                .setView([x, y], zoomLevel);
+            return this.map
+                       .setView([x, y], zoomLevel);
         }
     };
 
