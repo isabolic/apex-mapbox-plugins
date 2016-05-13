@@ -25,8 +25,8 @@ mapboxRegion (requires mapBoxIncludeAPI):
    - api method:
      - zoomTo (etc. apex.plugins.mapbox.map.zoomTo) - zoom to spec. postion on map (params: x,y,zoomlevel)
 
-   CL:
-   mapboxRegion:
+CL:
+- mapboxRegion:
    - supported maximize region - template option
    - event "mapBoxMap maximize region [mapBoxRegion]"
    
