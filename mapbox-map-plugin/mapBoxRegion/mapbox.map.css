@@ -14,7 +14,12 @@
     height: inherit;
 }
 
+.t-Region--scrollBody>.t-Region-bodyWrap>.t-Region-body.mapbox-map.leaflet-container {
+    overflow: hidden;
+}
+
 .t-Region.is-maximized>.t-Region-bodyWrap>.t-Region-body.mapbox-map.max-width{
     width: 100%!important;
     height: 100%!important;
+    overflow: hidden !important;
 }
