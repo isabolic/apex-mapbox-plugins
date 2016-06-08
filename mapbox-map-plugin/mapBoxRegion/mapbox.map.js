@@ -35,7 +35,7 @@
                 "east": bbox.getEast(),
                 "north": bbox.getNorth(),
                 "string": "BBOX(" + this.map.getBounds().toBBoxString() + ")"
-            }
+            };
 
         triggerEvent.apply(this, [evt, bboxJson]);
     };
@@ -84,7 +84,7 @@
     };
 
 
-    apex.plugins.mapBoxMap = function(opts) {
+    apex.plugins.mapbox.mapBoxMap = function(opts) {
         this.map = null;
         this.options = {};
         this.container = null;
@@ -115,9 +115,11 @@
 
             this.region = $("#" + this.options.mapRegionId);
 
-            if (this.container.length !== 1) {
+            if (this.region.length !== 1) {
                 throw "apex.plugins.mapBoxMap: Invalid region selector.";
             }
+
+
 
             this.container.addClass("mapbox-map");
             
@@ -135,7 +137,7 @@
                 this.options.initalView.y &&
                 this.options.initalView.zoomLevel) {
 
-                this.zoomTo(
+                this.setView(
                     this.options.initalView.x,
                     this.options.initalView.y,
                     this.options.initalView.zoomLevel
@@ -147,21 +149,46 @@
             this.region.on("click", 'span.js-maximizeButtonContainer', 
                            resizeMap.bind(this, "mapboxmap-maximize-region." + this.apexname));
 
+            this.region.data("mapboxRegion", this);
             return this;
         }
 
         return this.init();
     }
-    apex.plugins.mapBoxMap.prototype = {
+    apex.plugins.mapbox.mapBoxMap.prototype = {
         /**
-         * [zoomTo -  API method, zoom to spec. position]
+         * [setView -  API method, zoom to spec. position]
          * @param   Number  x          x cord.
          * @param   Number  y          y cord.
          * @param   Number  zoomLevel zoomLevel
          */
-        zoomTo: function zoomTo(x, y, zoomLevel) {
+        setView: function setView(x, y, zoomLevel) {
             return this.map
                        .setView([x, y], zoomLevel);
+        },
+        /**
+         * [zoomTo set/get zoomLevel]
+         * @param   Number  zoomLevel
+         * @return  Number  zoomLevel
+         */
+        zoomTo: function zoomTo(zoomLevel){
+            if(zoomLevel){
+                this.map.setZoom(zoomLevel);
+            }
+
+            return this.map.getZoom();
+        },
+        /**
+         * [setBounds description]
+         * @param {[type]} bbox      [description]
+         * @param {[type]} zoomLevel [description]
+         */
+        setBounds: function setBounds(bbox, zoomLevel) {
+                this.map.fitBounds(bbox);
+                if(this.map.zoomTo){
+                    this.map.zoomTo(zoomLevel);
+                }
+            return this;
         }
     };
 

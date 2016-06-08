@@ -1,4 +1,8 @@
-create or replace package body apex_plugin_pkg
+--------------------------------------------------------
+--  DDL for Package Body APEX_PLUGIN_PKG
+--------------------------------------------------------
+
+  CREATE OR REPLACE PACKAGE BODY "PLAYGROUND"."APEX_PLUGIN_PKG" 
 as
 
 gv_playground_host varchar2(100) := 'PLAYGROUND';
@@ -17,7 +21,41 @@ begin
         return false;
     end if;
 end f_is_playground; 
+   
+function mapbox_zoom_to_adapter_render (
+    p_dynamic_action      in apex_plugin.t_dynamic_action,
+    p_plugin              in apex_plugin.t_plugin)
+    return apex_plugin.t_dynamic_action_render_result is
+        v_exe_code     clob;
+        v_region_id    varchar2(200);
+        v_bbox_aitem   varchar2(200);
+        v_zlevel_aitem varchar2(200);
+        v_ax_plg       apex_plugin.t_dynamic_action_render_result;
+    begin    
+        v_region_id    := p_dynamic_action.attribute_01;
+        v_zlevel_aitem := p_dynamic_action.attribute_02;
+        
+        if f_is_playground = false then
+           apex_javascript.add_library(p_name           => 'mapbox.zoomto.adapter',
+                                       p_directory      => p_plugin.file_prefix,
+                                       p_version        => NULL,
+                                       p_skip_extension => FALSE);
+        end if;
     
+        v_exe_code := 'window.apex.plugins.mapbox.zoomToAdapter = new apex.plugins.mapbox.MapBoxZoomToAdapter' ||
+            '({ mapRegionId   :"'  || v_region_id     || '",'                       || 
+            '   zoomLevelItem :"'  || v_zlevel_aitem  || '",'                       || 
+            '   bboxItem      :"'  || v_bbox_aitem    || '" '                       ||
+            ' });';
+            
+        apex_javascript.add_onload_code(
+           p_code => v_exe_code
+        );
+    
+        v_ax_plg.javascript_function := 'window.apex.plugins.mapbox.zoomToAdapter.zoomTo()';
+        
+        return v_ax_plg;
+end mapbox_zoom_to_adapter_render;
     
 function mapbox_map_render (
     p_region              in apex_plugin.t_region,
@@ -42,8 +80,6 @@ function mapbox_map_render (
            v_region_id := 'R' ||  p_region.id;
         end if;
         
-        
-        
         if f_is_playground = false then
            apex_javascript.add_library(p_name           => 'mapbox.map',
                                        p_directory      => p_plugin.file_prefix,
@@ -55,7 +91,7 @@ function mapbox_map_render (
                     p_directory => p_plugin.file_prefix );
         end if;
         
-        v_exe_code := 'window.apex.plugins.mapbox.map = new apex.plugins.mapBoxMap' ||
+        v_exe_code := 'window.apex.plugins.mapbox.map = new apex.plugins.mapbox.mapBoxMap' ||
             '({ mapRegionContainer:"' || v_region_id || ' .t-Region-body", ' ||
             '   mapRegionId:"'  || v_region_id || '",'                       || 
             '   mapName    :"'  || v_map_name  || '",'                       || 
@@ -100,5 +136,8 @@ function mapbox_include (
     return NULL;
 end mapbox_include; 
 
+
+
 end apex_plugin_pkg;
+
 /
