@@ -87,6 +87,7 @@ wwv_flow_api.create_plugin_attribute(
 ,p_prompt=>'initalView'
 ,p_attribute_type=>'TEXT'
 ,p_is_required=>false
+,p_default_value=>'{}'
 ,p_supported_ui_types=>'DESKTOP:JQM_SMARTPHONE'
 ,p_is_translatable=>false
 );
