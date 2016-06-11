@@ -45,7 +45,6 @@ function mapbox_zoom_to_adapter_render (
         v_exe_code := 'window.apex.plugins.mapbox.zoomToAdapter = new apex.plugins.mapbox.MapBoxZoomToAdapter' ||
             '({ mapRegionId   :"'  || v_region_id     || '",'                       || 
             '   zoomLevelItem :"'  || v_zlevel_aitem  || '",'                       || 
-            '   bboxItem      :"'  || v_bbox_aitem    || '" '                       ||
             ' });';
             
         apex_javascript.add_onload_code(
@@ -56,6 +55,48 @@ function mapbox_zoom_to_adapter_render (
         
         return v_ax_plg;
 end mapbox_zoom_to_adapter_render;
+
+function mapbox_loadgeom_adapter_render (
+    p_dynamic_action      in apex_plugin.t_dynamic_action,
+    p_plugin              in apex_plugin.t_plugin)
+    return apex_plugin.t_dynamic_action_render_result is
+        v_exe_code     clob;
+        v_region_id    varchar2(200);        
+        v_apex_item    varchar2(200);
+        v_geom_style   varchar2(3000);
+        v_zoom_to_g    varchar2(10) := 'false';
+        v_ax_plg       apex_plugin.t_dynamic_action_render_result;
+    begin    
+        v_region_id    := p_dynamic_action.attribute_01;
+        v_apex_item    := p_dynamic_action.attribute_02;
+        v_geom_style   := p_dynamic_action.attribute_03;
+        
+        if p_dynamic_action.attribute_04 = 'Y' then
+            v_zoom_to_g := 'true';
+        end if;
+        
+        if f_is_playground = false then
+           apex_javascript.add_library(p_name           => 'mapbox.load.geometry.adapter',
+                                       p_directory      => p_plugin.file_prefix,
+                                       p_version        => NULL,
+                                       p_skip_extension => FALSE);
+        end if;
+    
+        v_exe_code := 'window.apex.plugins.mapbox.loadGeometryAdapter = new apex.plugins.mapbox.MapBoxLoadGeometryAdapter' ||
+            '({ mapRegionId   :"'  || v_region_id     || '",'                      || 
+            '   apexItem      :"'  || v_apex_item     || '",'                      ||  
+            '   zoomTo        : '  || v_zoom_to_g     || ' ,'                      ||
+            '   style         : '  || v_geom_style    ||                          
+            ' });';
+            
+        apex_javascript.add_onload_code(
+           p_code => v_exe_code
+        );
+    
+        v_ax_plg.javascript_function := 'window.apex.plugins.mapbox.loadGeometryAdapter.loadGeometry()';
+        
+        return v_ax_plg;
+end mapbox_loadgeom_adapter_render;
     
 function mapbox_map_render (
     p_region              in apex_plugin.t_region,

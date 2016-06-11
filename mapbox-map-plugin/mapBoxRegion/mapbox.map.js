@@ -189,7 +189,16 @@
                     this.map.zoomTo(zoomLevel);
                 }
             return this;
+        },
+
+        setGeoJSON:function setGeoJSON(geoJson, zoomTo) {
+            this.map.featureLayer.setGeoJSON(geoJson);
+            if(zoomTo === true){
+                this.setBounds(this.map.featureLayer.getBounds())
+            }
+            return this;
         }
+
     };
 
 })(apex.jQuery);
