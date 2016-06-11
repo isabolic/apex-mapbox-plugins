@@ -3,9 +3,8 @@ Oracle apex plugins for & mapbox API
 - compile packages APEX_PLUGIN_PKG
 - run install sql scripts for apex (region_xxx and item_xxx)
 - then in shared components plugins upload js&css files (or on apache host folder)
-- on global page set mapBoxIncludeAPI and set your API key (mapbox)
 - on your desired page set mapboxRegion (don't forget to set mapbox region template..)
-- remove in plugins file url calls (etc http://playground/ws/mapbox.map.css and http://playground/ws/mapbox.map.js)
+- remove in plugins file url calls (etc.. http://playground/ws/mapbox.map.css and http://playground/ws/mapbox.map.js)
 
 DOCS:
 mapBoxIncludeAPI:
