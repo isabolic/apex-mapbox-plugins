@@ -179,9 +179,9 @@
             return this.map.getZoom();
         },
         /**
-         * [setBounds description]
-         * @param {[type]} bbox      [description]
-         * @param {[type]} zoomLevel [description]
+         * [setBounds - zoom to spec. bounds]
+         * @param L.bounds bbox     L.bounds - object
+         * @param Number zoomLevel  zoomLevel - number
          */
         setBounds: function setBounds(bbox, zoomLevel) {
                 this.map.fitBounds(bbox);
@@ -191,10 +191,15 @@
             return this;
         },
 
+        /**
+         * [setGeoJSON - load geojson object on map]
+         * @param Object  geoJson geoJson object
+         * @param Boolean zoomTo  true/false to zoom on geometry bounds
+         */
         setGeoJSON:function setGeoJSON(geoJson, zoomTo) {
             this.map.featureLayer.setGeoJSON(geoJson);
             if(zoomTo === true){
-                this.setBounds(this.map.featureLayer.getBounds())
+                this.setBounds(this.map.featureLayer.getBounds());
             }
             return this;
         }

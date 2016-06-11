@@ -9,9 +9,10 @@ Oracle apex plugins for & mapbox API
 
 DOCS:
 mapBoxIncludeAPI:
-   - "API key"    : mapbox API key
+   - "API key"    : mapbox API key 
 
-mapboxRegion (requires mapBoxIncludeAPI):
+mapboxRegion (Region plugin)
+   -requires: mapBoxIncludeAPI
    - access in js console: apex.plugins.mapbox.map
    - Attributes:
      - "Map name"   : name of mapbox map
@@ -23,13 +24,40 @@ mapboxRegion (requires mapBoxIncludeAPI):
      - mapBoxMap change bbox [mapBoxRegion]      - after current bbox change 
      - mapBoxMap maximize region [mapBoxRegion]  - after region (map) maximize/ return to previous height/width
    - api method:
-     - zoomTo (etc. apex.plugins.mapbox.map.zoomTo) - zoom to spec. postion on map (params: x,y,zoomlevel)
+     - zoomTo     - zoom to spec. postion on map (params: x,y,zoomlevel)
+     - setBounds  - zoom to spec. bounds (bbox, zoomLevel)
+     - setGeoJSON - load geojson geometry and properties to mapBoxRegion (geoJson, zoomTo)
+   - example => https://apex.oracle.com/pls/apex/f?p=101959:2
+
+MapBoxZoomToAdapter (Dynamic action plugin)
+   - requires: mapboxRegion
+   - Attributes:
+     - "map region static ID" : static ID of the region
+     - "ZoomLevel apex item"  :  apex item which then is set value of current zoomLevel
+   - example => https://apex.oracle.com/pls/apex/f?p=101959:4
+
+
+MapBoxLoadGeometryAdapter (Dynamic action plugin)
+   - requires: mapboxRegion
+   - Attributes:
+     - "map region static ID"          :  static ID of the region
+     - "apex item with GEOJSON value"  :  apex item which is stored geoJson value
+     - "Geometry style JSON object:"   :  json config how geometry is visualized on map... example (
+                                            {
+                                            "fill"           : "#B10001",
+                                             "fill-opacity"  : 0.2,
+                                             "stroke"        : "#4c89e4",
+                                             "stroke-opacity": 1,
+                                             "stroke-width"  : 2}) see mapbox docs for more info.
+     - "Zoom to geometry"              : when geometry is loaded in mapBoxRegion should user zoom to geometry
+   - example => https://apex.oracle.com/pls/apex/f?p=101959:6
+
 
 CL:
 - mapboxRegion:
    - supported maximize region - template option
-   - event "mapBoxMap maximize region [mapBoxRegion]"
+   - event "mapBoxMap maximize region [mapBoxRegion]
+   - new methods: setBounds, setGeoJSON
+
    
-example:
-    https://apex.oracle.com/pls/apex/f?p=101959:2
 
