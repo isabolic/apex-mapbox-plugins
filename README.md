@@ -37,7 +37,7 @@ MapBoxZoomToAdapter (Dynamic action plugin)
 
 
 MapBoxLoadGeometryAdapter (Dynamic action plugin)
-   - requires: mapboxRegion
+   - requires: mapboxRegion, ORA2GEOJSON.pks, ORA2GEOJSON.pkb
    - Attributes:
      - "map region static ID"          :  static ID of the region
      - "apex item with GEOJSON value"  :  apex item which is stored geoJson value
