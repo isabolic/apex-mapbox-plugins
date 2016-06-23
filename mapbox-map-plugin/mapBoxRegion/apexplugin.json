@@ -1,0 +1,33 @@
+{
+  "name" : "mapBoxRegion",
+  "version" : "1.0",
+  "description" : "mapbox region plugin, requires: mapBoxIncludeAPI for more info => https://github.com/isabolic/apex-plugins/",
+  "keywords" : ["mapbox", "gis", "maps"],
+  "homepage" : "https://github.com/isabolic/apex-plugins/",
+  "bugs" : {
+    "url" : "https://github.com/isabolic/apex-plugins/issues",
+    "email" : "sabolic.ivan@gmail.com"
+  },
+  "license" : "MIT",
+  "author" : {
+    "name" : "Ivan Sabolić",
+    "email" : "sabolic.ivan@gmail.com"    
+  },
+  "repository" : {
+    "type" : "git",
+    "url" : "https://github.com/isabolic/apex-plugins.git"
+  },
+ "oracle" : {
+    "versions" : ["11.2.0.1", "12.1.0.1"],
+    "apex" : {
+      "versions" : ["5.0.0"],
+      "plugin" : {
+        "internalName" : "MAPBOXREGION",
+        "type" : "Region",
+        "demo" : "https://apex.oracle.com/pls/apex/f?p=101959:2",
+        "previewImage" : "https://raw.githubusercontent.com/isabolic/apex-plugins/tree/master/mapbox-map-plugin/mapBoxRegion/mapbox_region_plugin.png"
+      }
+    }
+  }
+}
+
