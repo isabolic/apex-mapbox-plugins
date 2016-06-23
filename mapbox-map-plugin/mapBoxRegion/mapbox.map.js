@@ -1,18 +1,27 @@
 /**
  * [created by isabolic sabolic.ivan@gmail.com]
  */
-(function($) {
+(function($, x) {
     var options = {
-        mapRegionContainer: null,
-        mapRegionId: null,
-        mapName: null,
-        width: "100%",
-        height: 300,
-        initalView: {
-            x: null,
-            y: null,
-            zoomLevel: null
+        mapRegionContainer : null,
+        mapRegionId        : null,
+        mapName            : null,
+        width              : "100%",
+        height             : 300,
+        initalView         : {
+            x                  : null,
+            y                  : null,
+            zoomLevel          : null
         }
+    };
+    
+    /**
+     * [xDebug - PRIVATE function for debug]
+     * @param  string   functionName  caller function
+     * @param  array    params        caller arguments
+     */
+    var xDebug = function(functionName, params){
+        x.debug(this.jsName || " - " || functionName, params, this);
     };
 
     /**
@@ -20,7 +29,9 @@
      * @param String evt - apex event name to trigger
      */
     var triggerEvent = function(evt, evtData) {
-        this.container.trigger(evt, [evtData]);
+        xDebug.call(this, arguments.callee.name, arguments);
+        this.container.trigger(evt, [evtData]);        
+        $(this).trigger(evt + "." + this.apexname, [evtData]);
     };
 
     /**
@@ -28,13 +39,13 @@
      * @param String evt - apex event name to trigger
      */
     var bboxChangeEvt = function(evt) {
-        var bbox = this.map.getBounds(),
+        var bbox     = this.map.getBounds(),
             bboxJson = {
-                "west": bbox.getWest(),
-                "south": bbox.getSouth(),
-                "east": bbox.getEast(),
-                "north": bbox.getNorth(),
-                "string": "BBOX(" + this.map.getBounds().toBBoxString() + ")"
+                "west"   : bbox.getWest(),
+                "south"  : bbox.getSouth(),
+                "east"   : bbox.getEast(),
+                "north"  : bbox.getNorth(),
+                "string" : "BBOX(" + this.map.getBounds().toBBoxString() + ")"
             };
 
         triggerEvent.apply(this, [evt, bboxJson]);
@@ -57,8 +68,8 @@
      */
     var resizeMap = function (evt){
         var o = {
-            w:this.region.width(),
-            h:this.region.height(),
+            w : this.region.width(),
+            h : this.region.height(),
         }, 
         timer, 
         bounds = this.map.getBounds();
@@ -89,37 +100,38 @@
         this.options = {};
         this.container = null;
         this.region = null;
-        this.events = [];
+        this.events = ["mapboxmap-change-bbox", 
+                       "mapboxmap-change-zoomlevel",
+                       "mapboxmap-maximize-region"];
+        this.jsName = "apex.plugins.mapBoxMap";
         this.apexname = "MAPBOXREGION";
         this.init = function() {
 
             if ($.isPlainObject(options)) {
                 this.options = $.extend(true, {}, this.options, options, opts);
             } else {
-                throw "apex.plugins.mapBoxMap: Invalid options passed.";
+                throw this.jsName || ": Invalid options passed.";
             }
 
             if (this.options.mapRegionContainer === null) {
-                throw "apex.plugins.mapBoxMap: mapRegionContainer is required.";
+                throw this.jsName || ": mapRegionContainer is required.";
             }
 
             this.container = $("#" + this.options.mapRegionContainer);
 
             if (this.container.length !== 1) {
-                throw "apex.plugins.mapBoxMap: Invalid region selector.";
+                throw this.jsName || ": Invalid region selector.";
             }
 
             if (this.options.mapRegionId === null) {
-                throw "apex.plugins.mapBoxMap: mapRegionContainer is required.";
+                throw this.jsName || ": mapRegionContainer is required.";
             }
 
             this.region = $("#" + this.options.mapRegionId);
 
             if (this.region.length !== 1) {
-                throw "apex.plugins.mapBoxMap: Invalid region selector.";
+                throw this.jsName || ": Invalid region selector.";
             }
-
-
 
             this.container.addClass("mapbox-map");
             
@@ -142,20 +154,25 @@
                     this.options.initalView.y,
                     this.options.initalView.zoomLevel
                 )
-            }
+            }            
 
-            this.map.on("move"   , bboxChangeEvt.bind(   this, "mapboxmap-change-bbox."      + this.apexname));
-            this.map.on("zoomend", zoomLlvChangeEvt.bind(this, "mapboxmap-change-zoomlevel." + this.apexname));
-            this.region.on("click", 'span.js-maximizeButtonContainer', 
-                           resizeMap.bind(this, "mapboxmap-maximize-region." + this.apexname));
+            this.map.on("move"   , bboxChangeEvt.bind(   this, this.events[0]));
+            this.map.on("zoomend", zoomLlvChangeEvt.bind(this, this.events[1]));            
+            this.region
+                .on("click", 'span.js-maximizeButtonContainer', 
+                    resizeMap.bind(this, this.events[2]));
 
             this.region.data("mapboxRegion", this);
+
+            x.debug("apex.plugins.mapBoxMap : ", this);
+            
             return this;
         }
 
         return this.init();
     }
     apex.plugins.mapbox.mapBoxMap.prototype = {
+        
         /**
          * [setView -  API method, zoom to spec. position]
          * @param   Number  x          x cord.
@@ -163,31 +180,36 @@
          * @param   Number  zoomLevel zoomLevel
          */
         setView: function setView(x, y, zoomLevel) {
+            xDebug.call(this, arguments.callee.name, arguments);
             return this.map
                        .setView([x, y], zoomLevel);
         },
+
         /**
          * [zoomTo set/get zoomLevel]
          * @param   Number  zoomLevel
          * @return  Number  zoomLevel
          */
         zoomTo: function zoomTo(zoomLevel){
+            xDebug.call(this, arguments.callee.name, arguments);
             if(zoomLevel){
                 this.map.setZoom(zoomLevel);
             }
 
             return this.map.getZoom();
         },
+
         /**
          * [setBounds - zoom to spec. bounds]
          * @param L.bounds bbox     L.bounds - object
          * @param Number zoomLevel  zoomLevel - number
          */
         setBounds: function setBounds(bbox, zoomLevel) {
-                this.map.fitBounds(bbox);
-                if(this.map.zoomTo){
-                    this.map.zoomTo(zoomLevel);
-                }
+            xDebug.call(this, arguments.callee.name, arguments);
+            this.map.fitBounds(bbox);
+            if(this.map.zoomTo){
+                this.map.zoomTo(zoomLevel);
+            }
             return this;
         },
 
@@ -197,6 +219,7 @@
          * @param Boolean zoomTo  true/false to zoom on geometry bounds
          */
         setGeoJSON:function setGeoJSON(geoJson, zoomTo) {
+            xDebug.call(this, arguments.callee.name, arguments);
             this.map.featureLayer.setGeoJSON(geoJson);
             if(zoomTo === true){
                 this.setBounds(this.map.featureLayer.getBounds());
@@ -206,4 +229,4 @@
 
     };
 
-})(apex.jQuery);
+})(apex.jQuery, apex);
