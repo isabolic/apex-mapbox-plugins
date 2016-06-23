@@ -172,7 +172,7 @@
         return this.init();
     }
     apex.plugins.mapbox.mapBoxMap.prototype = {
-        
+
         /**
          * [setView -  API method, zoom to spec. position]
          * @param   Number  x          x cord.
