@@ -39,23 +39,23 @@
             if ($.isPlainObject(options)) {
                 this.options = $.extend(true, {}, this.options, options, opts);
             } else {
-                throw throw this.jsName || ": Invalid options passed.";
+                throw this.jsName || ": Invalid options passed.";
             }
 
             if (this.options.mapRegionId === null) {
-                throw throw this.jsName || ": mapRegionId is required.";
+                throw this.jsName || ": mapRegionId is required.";
             }
 
             this.region = $("#" + this.options.mapRegionId);
 
             if (this.region.length !== 1) {
-                throw throw this.jsName || ": Invalid region selector.";
+                throw this.jsName || ": Invalid region selector.";
             }
 
             this.mapBoxMap = this.region.data("mapboxRegion");
             
             if ($.isPlainObject(this.mapBoxMap) === false) {
-                throw throw this.jsName || ": Can't access mapboxRegion region data.";
+                throw this.jsName || ": Can't access mapboxRegion region data.";
             }
 
             this.$items.zoomLevelItem = $("#" + this.options.zoomLevelItem);
