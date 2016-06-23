@@ -5,177 +5,223 @@
   CREATE OR REPLACE PACKAGE BODY "PLAYGROUND"."APEX_PLUGIN_PKG" 
 as
 
-gv_playground_host varchar2(100) := 'PLAYGROUND';
-
-function f_is_playground return boolean
-is 
-v_ax_workspace varchar2(200);
-begin
-    select apex_util.find_workspace((select apex_application.get_security_group_id from dual))
-      into v_ax_workspace 
-      from dual;
-      
-    if  gv_playground_host = v_ax_workspace then
-        return true;
-    else 
-        return false;
-    end if;
-end f_is_playground; 
-   
-function mapbox_zoom_to_adapter_render (
-    p_dynamic_action      in apex_plugin.t_dynamic_action,
-    p_plugin              in apex_plugin.t_plugin)
-    return apex_plugin.t_dynamic_action_render_result is
-        v_exe_code     clob;
-        v_region_id    varchar2(200);
-        v_bbox_aitem   varchar2(200);
-        v_zlevel_aitem varchar2(200);
-        v_ax_plg       apex_plugin.t_dynamic_action_render_result;
-    begin    
-        v_region_id    := p_dynamic_action.attribute_01;
-        v_zlevel_aitem := p_dynamic_action.attribute_02;
+    gv_playground_host varchar2(100) := 'PLAYGROUND';
+    
+    function f_is_playground return boolean
+    is 
+    v_ax_workspace varchar2(200);
+    begin
+        select apex_util.find_workspace((select apex_application.get_security_group_id from dual))
+          into v_ax_workspace 
+          from dual;
+          
+        if  gv_playground_host = v_ax_workspace then
+            return true;
+        else 
+            return false;
+        end if;
+    end f_is_playground; 
+    
+    procedure res_out(p_txt varchar2) is
+        begin
+            sys.htp.p(p_txt);
+    end res_out;
+    
+    function esc(p_txt varchar2) return varchar2 is
+    begin
+      return sys.htf.escape_sc(p_txt);
+    end esc;
+       
+    function mapbox_zoom_to_adapter_render (
+        p_dynamic_action      in apex_plugin.t_dynamic_action,
+        p_plugin              in apex_plugin.t_plugin)
+        return apex_plugin.t_dynamic_action_render_result is
+            v_exe_code     clob;
+            v_region_id    varchar2(200);
+            v_bbox_aitem   varchar2(200);
+            v_zlevel_aitem varchar2(200);
+            v_ax_plg       apex_plugin.t_dynamic_action_render_result;
+        begin    
+            v_region_id    := p_dynamic_action.attribute_01;
+            v_zlevel_aitem := p_dynamic_action.attribute_02;
+            
+            if f_is_playground = false then
+               apex_javascript.add_library(p_name           => 'mapbox.zoomto.adapter',
+                                           p_directory      => p_plugin.file_prefix,
+                                           p_version        => NULL,
+                                           p_skip_extension => FALSE);
+            end if;
+        
+            v_exe_code := 'window.apex.plugins.mapbox.zoomToAdapter = new apex.plugins.mapbox.MapBoxZoomToAdapter' ||
+                '({ mapRegionId   :"'  || v_region_id     || '",'                       || 
+                '   zoomLevelItem :"'  || v_zlevel_aitem  || '",'                       || 
+                ' });';
+                
+            apex_javascript.add_onload_code(
+               p_code => v_exe_code
+            );
+        
+            v_ax_plg.javascript_function := 'window.apex.plugins.mapbox.zoomToAdapter.zoomTo()';
+            
+            return v_ax_plg;
+    end mapbox_zoom_to_adapter_render;
+    
+    function mapbox_loadgeom_adapter_render (
+        p_dynamic_action      in apex_plugin.t_dynamic_action,
+        p_plugin              in apex_plugin.t_plugin)
+        return apex_plugin.t_dynamic_action_render_result is
+            v_exe_code     clob;
+            v_region_id    varchar2(200);        
+            v_apex_item    varchar2(200);
+            v_geom_style   varchar2(3000);
+            v_zoom_to_g    varchar2(10) := 'false';
+            v_ax_plg       apex_plugin.t_dynamic_action_render_result;
+        begin    
+            v_region_id    := p_dynamic_action.attribute_01;
+            v_apex_item    := p_dynamic_action.attribute_02;
+            v_geom_style   := p_dynamic_action.attribute_03;
+            
+            if p_dynamic_action.attribute_04 = 'Y' then
+                v_zoom_to_g := 'true';
+            end if;
+            
+            if f_is_playground = false then
+               apex_javascript.add_library(p_name           => 'mapbox.load.geometry.adapter',
+                                           p_directory      => p_plugin.file_prefix,
+                                           p_version        => NULL,
+                                           p_skip_extension => FALSE);
+            end if;
+        
+            v_exe_code := 'window.apex.plugins.mapbox.loadGeometryAdapter = new apex.plugins.mapbox.MapBoxLoadGeometryAdapter' ||
+                '({ mapRegionId   :"'  || v_region_id     || '",'                      || 
+                '   apexItem      :"'  || v_apex_item     || '",'                      ||  
+                '   zoomTo        : '  || v_zoom_to_g     || ' ,'                      ||
+                '   style         : '  || v_geom_style    || ' ,'                      ||
+                '   ajaxIdentifier:"'  || apex_plugin.get_ajax_identifier              ||
+                '" });';
+                
+            apex_javascript.add_onload_code(
+               p_code => v_exe_code
+            );
+        
+            v_ax_plg.javascript_function := 'function(){window.apex.plugins.mapbox.loadGeometryAdapter.loadFromAjax()}';
+            
+            return v_ax_plg;
+    end mapbox_loadgeom_adapter_render;
+    
+    function mapbox_loadgeom_adapter_ajax (
+        p_dynamic_action      in apex_plugin.t_dynamic_action,
+        p_plugin              in apex_plugin.t_plugin)
+        return apex_plugin.t_dynamic_action_ajax_result
+        is
+            v_result apex_plugin.t_dynamic_action_ajax_result;
+            v_geojson clob;
+            --
+            v_id           varchar2(32000) := wwv_flow.g_x01;
+            v_owner        varchar2(40)    := p_dynamic_action.attribute_05;
+            v_table        varchar2(40)    := p_dynamic_action.attribute_06;
+            v_column       varchar2(40)    := p_dynamic_action.attribute_07;
+            v_col_name_pk  varchar2(40)    := p_dynamic_action.attribute_08;
+            v_query   varchar2(32000) := 
+                    'select ora2geojson.sdo2geojson(''select * from #USER#.#TABLE#''
+                                       ,rowid
+                                       ,#COLUMN#) geom
+                       from #USER#.#TABLE# t
+                      where t.#COLUMN_ID# = :pk_id';            
+    begin
+    
+        v_query := replace(v_query, '#USER#'     , v_owner );
+        v_query := replace(v_query, '#TABLE#'    , v_table );
+        v_query := replace(v_query, '#COLUMN#'   , v_column);
+        v_query := replace(v_query, '#COLUMN_ID#', v_col_name_pk);
+        
+        execute immediate v_query
+           into v_geojson
+          using v_id;
+        
+        res_out(v_geojson);
+    
+        return v_result;
+    end mapbox_loadgeom_adapter_ajax;
+        
+    function mapbox_map_render (
+        p_region              in apex_plugin.t_region,
+        p_plugin              in apex_plugin.t_plugin,
+        p_is_printer_friendly in boolean )
+        return apex_plugin.t_region_render_result IS
+         v_map_name  VARCHAR2(2000);
+         v_exe_code  CLOB;
+         v_width     varchar2(200);
+         v_height    varchar2(200);
+         v_init_view VARCHAR2(3000);
+         v_region_id varchar2(200);
+        BEGIN
+            v_map_name  := p_region.attribute_01;
+            v_width     := p_region.attribute_02;
+            v_height    := p_region.attribute_03;
+            v_init_view := p_region.attribute_04;
+            
+            v_region_id := p_region.static_id;
+            
+            if v_region_id is null then
+               v_region_id := 'R' ||  p_region.id;
+            end if;
+            
+            if f_is_playground = false then
+               apex_javascript.add_library(p_name           => 'mapbox.map',
+                                           p_directory      => p_plugin.file_prefix,
+                                           p_version        => NULL,
+                                           p_skip_extension => FALSE);
+               
+                   apex_css.add_file (
+                        p_name      => 'mapbox.map',
+                        p_directory => p_plugin.file_prefix );
+            end if;
+            
+            v_exe_code := 'window.apex.plugins.mapbox.map = new apex.plugins.mapbox.mapBoxMap' ||
+                '({ mapRegionContainer:"' || v_region_id || ' .t-Region-body", ' ||
+                '   mapRegionId:"'  || v_region_id || '",'                       || 
+                '   mapName    :"'  || v_map_name  || '",'                       || 
+                '   width      :"'  || v_width     || '",'                       ||
+                '   height     :"'  || v_height    || '",'                       ||
+                '   initalView : '  || v_init_view     || ' });';
+        
+            apex_javascript.add_onload_code(
+               p_code => v_exe_code
+            );
+        
+        return NULL;
+    END mapbox_map_render;
+    
+    function mapbox_include (
+        p_item                in apex_plugin.t_page_item,
+        p_plugin              in apex_plugin.t_plugin,
+        p_value               in varchar2,
+        p_is_readonly         in boolean,
+        p_is_printer_friendly in boolean )
+        return apex_plugin.t_page_item_render_result    
+        IS 
+        v_api_key VARCHAR2(2000);
+        BEGIN
+        
+        v_api_key := p_item.attribute_01;
         
         if f_is_playground = false then
-           apex_javascript.add_library(p_name           => 'mapbox.zoomto.adapter',
-                                       p_directory      => p_plugin.file_prefix,
-                                       p_version        => NULL,
-                                       p_skip_extension => FALSE);
+            apex_javascript.add_library(p_name           => 'mapbox.init',
+                                        p_directory      => p_plugin.file_prefix,
+                                        p_version        => NULL,
+                                        p_skip_extension => FALSE);
         end if;
-    
-        v_exe_code := 'window.apex.plugins.mapbox.zoomToAdapter = new apex.plugins.mapbox.MapBoxZoomToAdapter' ||
-            '({ mapRegionId   :"'  || v_region_id     || '",'                       || 
-            '   zoomLevelItem :"'  || v_zlevel_aitem  || '",'                       || 
-            ' });';
-            
-        apex_javascript.add_onload_code(
-           p_code => v_exe_code
-        );
-    
-        v_ax_plg.javascript_function := 'window.apex.plugins.mapbox.zoomToAdapter.zoomTo()';
+                
+        sys.htp.p('<script src="https://api.mapbox.com/mapbox.js/v2.2.4/mapbox.js"></script>');
+        sys.htp.p('<link href="https://api.mapbox.com/mapbox.js/v2.2.4/mapbox.css" rel="stylesheet" />');
         
-        return v_ax_plg;
-end mapbox_zoom_to_adapter_render;
-
-function mapbox_loadgeom_adapter_render (
-    p_dynamic_action      in apex_plugin.t_dynamic_action,
-    p_plugin              in apex_plugin.t_plugin)
-    return apex_plugin.t_dynamic_action_render_result is
-        v_exe_code     clob;
-        v_region_id    varchar2(200);        
-        v_apex_item    varchar2(200);
-        v_geom_style   varchar2(3000);
-        v_zoom_to_g    varchar2(10) := 'false';
-        v_ax_plg       apex_plugin.t_dynamic_action_render_result;
-    begin    
-        v_region_id    := p_dynamic_action.attribute_01;
-        v_apex_item    := p_dynamic_action.attribute_02;
-        v_geom_style   := p_dynamic_action.attribute_03;
+        sys.htp.p('<script>');
+        sys.htp.p('L.mapbox.accessToken = "' || v_api_key || '"');
+        sys.htp.p('</script>');
         
-        if p_dynamic_action.attribute_04 = 'Y' then
-            v_zoom_to_g := 'true';
-        end if;
-        
-        if f_is_playground = false then
-           apex_javascript.add_library(p_name           => 'mapbox.load.geometry.adapter',
-                                       p_directory      => p_plugin.file_prefix,
-                                       p_version        => NULL,
-                                       p_skip_extension => FALSE);
-        end if;
-    
-        v_exe_code := 'window.apex.plugins.mapbox.loadGeometryAdapter = new apex.plugins.mapbox.MapBoxLoadGeometryAdapter' ||
-            '({ mapRegionId   :"'  || v_region_id     || '",'                      || 
-            '   apexItem      :"'  || v_apex_item     || '",'                      ||  
-            '   zoomTo        : '  || v_zoom_to_g     || ' ,'                      ||
-            '   style         : '  || v_geom_style    ||                          
-            ' });';
-            
-        apex_javascript.add_onload_code(
-           p_code => v_exe_code
-        );
-    
-        v_ax_plg.javascript_function := 'window.apex.plugins.mapbox.loadGeometryAdapter.loadGeometry()';
-        
-        return v_ax_plg;
-end mapbox_loadgeom_adapter_render;
-    
-function mapbox_map_render (
-    p_region              in apex_plugin.t_region,
-    p_plugin              in apex_plugin.t_plugin,
-    p_is_printer_friendly in boolean )
-    return apex_plugin.t_region_render_result IS
-     v_map_name  VARCHAR2(2000);
-     v_exe_code  CLOB;
-     v_width     varchar2(200);
-     v_height    varchar2(200);
-     v_init_view VARCHAR2(3000);
-     v_region_id varchar2(200);
-    BEGIN
-        v_map_name  := p_region.attribute_01;
-        v_width     := p_region.attribute_02;
-        v_height    := p_region.attribute_03;
-        v_init_view := p_region.attribute_04;
-        
-        v_region_id := p_region.static_id;
-        
-        if v_region_id is null then
-           v_region_id := 'R' ||  p_region.id;
-        end if;
-        
-        if f_is_playground = false then
-           apex_javascript.add_library(p_name           => 'mapbox.map',
-                                       p_directory      => p_plugin.file_prefix,
-                                       p_version        => NULL,
-                                       p_skip_extension => FALSE);
-           
-               apex_css.add_file (
-                    p_name      => 'mapbox.map',
-                    p_directory => p_plugin.file_prefix );
-        end if;
-        
-        v_exe_code := 'window.apex.plugins.mapbox.map = new apex.plugins.mapbox.mapBoxMap' ||
-            '({ mapRegionContainer:"' || v_region_id || ' .t-Region-body", ' ||
-            '   mapRegionId:"'  || v_region_id || '",'                       || 
-            '   mapName    :"'  || v_map_name  || '",'                       || 
-            '   width      :"'  || v_width     || '",'                       ||
-            '   height     :"'  || v_height    || '",'                       ||
-            '   initalView : '  || v_init_view     || ' });';
-    
-        apex_javascript.add_onload_code(
-           p_code => v_exe_code
-        );
-    
-    return NULL;
-END mapbox_map_render;
-
-function mapbox_include (
-    p_item                in apex_plugin.t_page_item,
-    p_plugin              in apex_plugin.t_plugin,
-    p_value               in varchar2,
-    p_is_readonly         in boolean,
-    p_is_printer_friendly in boolean )
-    return apex_plugin.t_page_item_render_result    
-    IS 
-    v_api_key VARCHAR2(2000);
-    BEGIN
-    
-    v_api_key := p_item.attribute_01;
-    
-    if f_is_playground = false then
-        apex_javascript.add_library(p_name           => 'mapbox.init',
-                                    p_directory      => p_plugin.file_prefix,
-                                    p_version        => NULL,
-                                    p_skip_extension => FALSE);
-    end if;
-            
-    sys.htp.p('<script src="https://api.mapbox.com/mapbox.js/v2.2.4/mapbox.js"></script>');
-    sys.htp.p('<link href="https://api.mapbox.com/mapbox.js/v2.2.4/mapbox.css" rel="stylesheet" />');
-    
-    sys.htp.p('<script>');
-    sys.htp.p('L.mapbox.accessToken = "' || v_api_key || '"');
-    sys.htp.p('</script>');
-    
-    return NULL;
-end mapbox_include; 
+        return NULL;
+    end mapbox_include; 
 
 
 
