@@ -166,7 +166,7 @@ as
             v_query_json := replace(v_query_json, '#COLUMN_ID#', v_col_name_pk);
             
                 
-            execute immediate v_query_sdo
+            execute immediate v_query_json
                into v_geojson
               using v_id;
               
