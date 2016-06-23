@@ -80,6 +80,7 @@
                 p_flow_id      : $('#pFlowId').val(),
                 p_flow_step_id : $('#pFlowStepId').val(),
                 p_instance     : $('#pInstance').val(),
+                p_debug        : $('#pdebug').val(),
                 x01            : idVal || this.$items.apexItem.val(),
                 p_request      : 'PLUGIN=' + this.options.ajaxIdentifier
             };
