@@ -140,6 +140,19 @@ wwv_flow_api.create_plugin_attribute(
 ,p_supported_ui_types=>'DESKTOP:JQM_SMARTPHONE'
 ,p_is_translatable=>false
 );
+wwv_flow_api.create_plugin_attribute(
+ p_id=>wwv_flow_api.id(9021969760633533)
+,p_plugin_id=>wwv_flow_api.id(8966021210298693)
+,p_attribute_scope=>'COMPONENT'
+,p_attribute_sequence=>9
+,p_display_sequence=>90
+,p_prompt=>'Column is already geojson format'
+,p_attribute_type=>'CHECKBOX'
+,p_is_required=>false
+,p_default_value=>'N'
+,p_supported_ui_types=>'DESKTOP:JQM_SMARTPHONE'
+,p_is_translatable=>false
+);
 end;
 /
 begin

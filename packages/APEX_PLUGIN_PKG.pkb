@@ -116,28 +116,65 @@ as
         is
             v_result apex_plugin.t_dynamic_action_ajax_result;
             v_geojson clob;
+            v_data_type varchar2(200);
+            ex_invalid_type EXCEPTION;
             --
             v_id           varchar2(32000) := wwv_flow.g_x01;
             v_owner        varchar2(40)    := p_dynamic_action.attribute_05;
             v_table        varchar2(40)    := p_dynamic_action.attribute_06;
             v_column       varchar2(40)    := p_dynamic_action.attribute_07;
             v_col_name_pk  varchar2(40)    := p_dynamic_action.attribute_08;
-            v_query   varchar2(32000) := 
+            v_col_is_gjson varchar2(1)     := p_dynamic_action.attribute_09;
+            v_query_sdo   varchar2(32000) := 
                     'select ora2geojson.sdo2geojson(''select * from #USER#.#TABLE#''
                                        ,rowid
                                        ,#COLUMN#) geom
                        from #USER#.#TABLE# t
-                      where t.#COLUMN_ID# = :pk_id';            
+                      where t.#COLUMN_ID# = :pk_id';
+            v_query_json varchar2(32000) := 
+                    'select #COLUMN#
+                       from #USER#.#TABLE# t
+                      where t.#COLUMN_ID# = :pk_id';
     begin
     
-        v_query := replace(v_query, '#USER#'     , v_owner );
-        v_query := replace(v_query, '#TABLE#'    , v_table );
-        v_query := replace(v_query, '#COLUMN#'   , v_column);
-        v_query := replace(v_query, '#COLUMN_ID#', v_col_name_pk);
+        select atc.data_type
+          into v_data_type
+          from all_tab_columns atc left join all_synonyms s 
+               on (atc.owner = s.table_owner and atc.table_name = s.table_name)
+         where 1=1
+           and atc.table_name = v_table
+           and atc.column_name = v_column
+           and (atc.owner = v_owner or s.owner = v_owner)
+         order by atc.owner, atc.table_name;
         
-        execute immediate v_query
-           into v_geojson
-          using v_id;
+        if v_data_type = 'SDO_GEOMETRY' and v_col_is_gjson = 'N' then
+
+            v_query_sdo := replace(v_query_sdo, '#USER#'     , v_owner );
+            v_query_sdo := replace(v_query_sdo, '#TABLE#'    , v_table );
+            v_query_sdo := replace(v_query_sdo, '#COLUMN#'   , v_column);
+            v_query_sdo := replace(v_query_sdo, '#COLUMN_ID#', v_col_name_pk);
+            
+                
+            execute immediate v_query_sdo
+               into v_geojson
+              using v_id;
+              
+        elsif v_col_is_gjson = 'Y' and v_data_type != 'SDO_GEOMETRY' then
+            v_query_json := replace(v_query_json, '#USER#'     , v_owner );
+            v_query_json := replace(v_query_json, '#TABLE#'    , v_table );
+            v_query_json := replace(v_query_json, '#COLUMN#'   , v_column);
+            v_query_json := replace(v_query_json, '#COLUMN_ID#', v_col_name_pk);
+            
+                
+            execute immediate v_query_sdo
+               into v_geojson
+              using v_id;
+              
+        elsif v_col_is_gjson = 'N' then
+            raise ex_invalid_type;
+        end if;
+        
+                    
         
         res_out(v_geojson);
     
