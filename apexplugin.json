@@ -24,7 +24,8 @@
       "plugin" : {
         "internalName" : "MAPBOXREGION",
         "type" : "Region",
-        "demo" : "https://apex.oracle.com/pls/apex/f?p=101959:2"        
+        "demo" : "https://apex.oracle.com/pls/apex/f?p=101959:2",
+        "previewImage" : "https://raw.githubusercontent.com/isabolic/apex-plugins/master/mapbox.region.png"       
       }
     }
   }
