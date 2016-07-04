@@ -1,7 +1,12 @@
 {
   "name" : "mapBoxRegion",
   "version" : "1.0",
-  "description" : "mapbox plugins, requires: mapBoxIncludeAPI for more info => https://github.com/isabolic/apex-plugins/",
+  "description" : "mapbox plugins,
+                    MapBoxLoadGeometryAdapter   Dynamic Action - load geometry into map region
+                    MapBoxZoomToAdapter         Dynamic Action - zoom level dy. action control
+                    mapBoxIncludeAPI            Item           - API key item
+                    mapBoxRegion                Region plugin  - map region
+                   for more info => https://github.com/isabolic/apex-plugins/",
   "keywords" : ["mapbox", "gis", "maps"],
   "homepage" : "https://github.com/isabolic/apex-plugins/",
   "bugs" : {

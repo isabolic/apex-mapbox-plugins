@@ -75,7 +75,7 @@
         bounds = this.map.getBounds();
         
         // wait until html renders
-        timer = setTimeout(function(){
+        timer = setInterval(function(){
             if(o.w === this.region.width() &&
                o.h === this.region.height()){
 
@@ -84,12 +84,12 @@
                 }else{
                     this.container.removeClass("max-width");
                 }
-
+                
                 this.map.invalidateSize();
                 this.map.fitBounds(bounds);
 
                 triggerEvent.apply(this, [evt]);
-
+                clearInterval(timer);
             }
         }.bind(this), 100);
     };
