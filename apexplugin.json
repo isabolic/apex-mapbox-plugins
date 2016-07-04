@@ -1,12 +1,7 @@
 {
   "name" : "mapBoxRegion",
   "version" : "0.0.1",
-  "description" : "mapbox plugins,
-                    MapBoxLoadGeometryAdapter   Dynamic Action - load geometry into map region
-                    MapBoxZoomToAdapter         Dynamic Action - zoom level dy. action control
-                    mapBoxIncludeAPI            Item           - API key item
-                    mapBoxRegion                Region plugin  - map region
-                   for more info => https://github.com/isabolic/apex-plugins/",
+  "description" : " several mapbox plugins for more info => https://github.com/isabolic/apex-plugins/",
   "keywords" : ["mapbox", "gis", "maps"],
   "homepage" : "https://github.com/isabolic/apex-plugins/",
   "bugs" : {
@@ -28,7 +23,7 @@
       "versions" : ["5.0.0"],
       "plugin" : {
         "internalName" : "MAPBOXREGION",
-        "type" : "Region",
+        "type" : "Region, Item, Dynamic Action",
         "demo" : "https://apex.oracle.com/pls/apex/f?p=101959:2"        
       }
     }
