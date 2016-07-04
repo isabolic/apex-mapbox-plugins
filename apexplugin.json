@@ -23,7 +23,7 @@
       "versions" : ["5.0.0"],
       "plugin" : {
         "internalName" : "MAPBOXREGION",
-        "type" : "Region, Item, Dynamic Action",
+        "type" : "Region",
         "demo" : "https://apex.oracle.com/pls/apex/f?p=101959:2"        
       }
     }
