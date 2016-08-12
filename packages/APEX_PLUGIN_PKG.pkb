@@ -2,7 +2,7 @@
 --  DDL for Package Body APEX_PLUGIN_PKG
 --------------------------------------------------------
 
-  CREATE OR REPLACE PACKAGE BODY "PLAYGROUND"."APEX_PLUGIN_PKG" 
+  CREATE OR REPLACE PACKAGE BODY "APEX_PLUGIN_PKG" 
 as
 
     gv_playground_host varchar2(100) := 'PLAYGROUND';
