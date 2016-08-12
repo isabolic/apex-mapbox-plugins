@@ -22,9 +22,24 @@ as
         end if;
     end f_is_playground; 
     
-    procedure res_out(p_txt varchar2) is
+    procedure res_out(p_clob  clob) is
+        v_char varchar2(32000);
+        v_clob clob := p_clob;
+    begin        
+        while length(v_clob) > 0 loop
         begin
-            sys.htp.p(p_txt);
+            if length(v_clob) > 32000 then
+                v_char := substr(v_clob,1,32000);
+                sys.htp.prn(v_char);
+                v_clob:= substr(v_clob, length(v_char) +1);
+            else
+                v_char := v_clob;
+                sys.htp.prn(v_char);
+                v_char := '';
+                v_clob := '';
+            end if;
+        end;
+        end loop;
     end res_out;
     
     function esc(p_txt varchar2) return varchar2 is
@@ -118,6 +133,7 @@ as
             v_geojson clob;
             v_data_type varchar2(200);
             ex_invalid_type EXCEPTION;
+            v_cursor        SYS_REFCURSOR;
             --
             v_id           varchar2(32000) := wwv_flow.g_x01;
             v_owner        varchar2(40)    := p_dynamic_action.attribute_05;
@@ -129,13 +145,18 @@ as
                     'select ora2geojson.sdo2geojson(''select * from #USER#.#TABLE#''
                                        ,rowid
                                        ,#COLUMN#) geom
-                       from #USER#.#TABLE# t
-                      where t.#COLUMN_ID# = :pk_id';
+                       from #USER#.#TABLE# t';
+                       
             v_query_json varchar2(32000) := 
                     'select #COLUMN#
-                       from #USER#.#TABLE# t
-                      where t.#COLUMN_ID# = :pk_id';
+                       from #USER#.#TABLE# t';                       
+           v_where      varchar2(200) := ' where t.#COLUMN_ID# = :pk_id';
     begin
+        
+        if v_col_name_pk is not null then
+            v_query_json := v_query_json || v_where;
+            v_query_sdo  := v_query_sdo || v_where;
+        end if;
     
         select atc.data_type
           into v_data_type
@@ -147,38 +168,67 @@ as
            and (atc.owner = v_owner or s.owner = v_owner)
          order by atc.owner, atc.table_name;
         
-        if v_data_type = 'SDO_GEOMETRY' and v_col_is_gjson = 'N' then
-
-            v_query_sdo := replace(v_query_sdo, '#USER#'     , v_owner );
-            v_query_sdo := replace(v_query_sdo, '#TABLE#'    , v_table );
-            v_query_sdo := replace(v_query_sdo, '#COLUMN#'   , v_column);
-            v_query_sdo := replace(v_query_sdo, '#COLUMN_ID#', v_col_name_pk);
-            
-                
-            execute immediate v_query_sdo
-               into v_geojson
-              using v_id;
-              
-        elsif v_col_is_gjson = 'Y' and v_data_type != 'SDO_GEOMETRY' then
-            v_query_json := replace(v_query_json, '#USER#'     , v_owner );
-            v_query_json := replace(v_query_json, '#TABLE#'    , v_table );
-            v_query_json := replace(v_query_json, '#COLUMN#'   , v_column);
-            v_query_json := replace(v_query_json, '#COLUMN_ID#', v_col_name_pk);
-            
-                
-            execute immediate v_query_json
-               into v_geojson
-              using v_id;
-              
-        elsif v_col_is_gjson = 'N' then
-            raise ex_invalid_type;
-        end if;
-        
-                    
-        
-        res_out(v_geojson);
+        if v_col_name_pk is not null then
+            if v_data_type = 'SDO_GEOMETRY' and v_col_is_gjson = 'N' then
     
+                v_query_sdo := replace(v_query_sdo, '#USER#'     , v_owner );
+                v_query_sdo := replace(v_query_sdo, '#TABLE#'    , v_table );
+                v_query_sdo := replace(v_query_sdo, '#COLUMN#'   , v_column);
+                v_query_sdo := replace(v_query_sdo, '#COLUMN_ID#', v_col_name_pk);
+                
+                    
+                execute immediate v_query_sdo
+                   into v_geojson
+                  using v_id;
+                  
+            elsif v_col_is_gjson = 'Y' and v_data_type != 'SDO_GEOMETRY' then
+                v_query_json := replace(v_query_json, '#USER#'     , v_owner );
+                v_query_json := replace(v_query_json, '#TABLE#'    , v_table );
+                v_query_json := replace(v_query_json, '#COLUMN#'   , v_column);
+                v_query_json := replace(v_query_json, '#COLUMN_ID#', v_col_name_pk);
+                
+                    
+                execute immediate v_query_json
+                   into v_geojson
+                  using v_id;
+                  
+            elsif v_col_is_gjson = 'N' then
+                raise ex_invalid_type;
+            end if;
+            
+             res_out(v_geojson);
+    
+        else 
+             if v_data_type = 'SDO_GEOMETRY' and v_col_is_gjson = 'N' then
+    
+                v_query_sdo := replace(v_query_sdo, '#USER#'     , v_owner );
+                v_query_sdo := replace(v_query_sdo, '#TABLE#'    , v_table );
+                v_query_sdo := replace(v_query_sdo, '#COLUMN#'   , v_column);            
+                
+                 
+                OPEN v_cursor for v_query_sdo;
+                  
+            elsif v_col_is_gjson = 'Y' and v_data_type != 'SDO_GEOMETRY' then
+                v_query_json := replace(v_query_json, '#USER#'     , v_owner );
+                v_query_json := replace(v_query_json, '#TABLE#'    , v_table );
+                v_query_json := replace(v_query_json, '#COLUMN#'   , v_column);
+                
+                    
+                OPEN v_cursor for v_query_json;
+                  
+            elsif v_col_is_gjson = 'N' then
+                raise ex_invalid_type;
+            end if;
+            
+             
+             LOOP
+               FETCH v_cursor INTO v_geojson;
+               EXIT WHEN v_cursor%NOTFOUND;  
+               res_out(v_geojson);
+             END LOOP;
+        end if;
         return v_result;
+        
     end mapbox_loadgeom_adapter_ajax;
         
     function mapbox_map_render (
@@ -186,12 +236,13 @@ as
         p_plugin              in apex_plugin.t_plugin,
         p_is_printer_friendly in boolean )
         return apex_plugin.t_region_render_result IS
-         v_map_name  VARCHAR2(2000);
-         v_exe_code  CLOB;
+         v_map_name  varchar2(2000);
+         v_exe_code  clob;
          v_width     varchar2(200);
          v_height    varchar2(200);
-         v_init_view VARCHAR2(3000);
+         v_init_view varchar2(3000);
          v_region_id varchar2(200);
+         v_ax_plg    apex_plugin.t_region_render_result;
         BEGIN
             v_map_name  := p_region.attribute_01;
             v_width     := p_region.attribute_02;
@@ -227,7 +278,7 @@ as
                p_code => v_exe_code
             );
         
-        return NULL;
+        return v_ax_plg;
     END mapbox_map_render;
     
     function mapbox_include (
@@ -238,7 +289,10 @@ as
         p_is_printer_friendly in boolean )
         return apex_plugin.t_page_item_render_result    
         IS 
-        v_api_key VARCHAR2(2000);
+        --
+        v_api_key varchar2(2000);
+        v_ax_plg  apex_plugin.t_page_item_render_result;
+        --
         BEGIN
         
         v_api_key := p_item.attribute_01;
@@ -250,16 +304,15 @@ as
                                         p_skip_extension => FALSE);
         end if;
                 
-        sys.htp.p('<script src="https://api.mapbox.com/mapbox.js/v2.2.4/mapbox.js"></script>');
-        sys.htp.p('<link href="https://api.mapbox.com/mapbox.js/v2.2.4/mapbox.css" rel="stylesheet" />');
+        res_out('<script src="https://api.mapbox.com/mapbox.js/v2.2.4/mapbox.js"></script>');
+        res_out('<link href="https://api.mapbox.com/mapbox.js/v2.2.4/mapbox.css" rel="stylesheet" />');
         
-        sys.htp.p('<script>');
-        sys.htp.p('L.mapbox.accessToken = "' || v_api_key || '"');
-        sys.htp.p('</script>');
+        res_out('<script>');
+        res_out('L.mapbox.accessToken = "' || v_api_key || '"');
+        res_out('</script>');
         
-        return NULL;
-    end mapbox_include; 
-
+        return v_ax_plg;
+    end mapbox_include;
 
 
 end apex_plugin_pkg;
