@@ -2,7 +2,7 @@
 --  DDL for Package Body ORA2GEOJSON
 --------------------------------------------------------
 
-  CREATE OR REPLACE PACKAGE BODY "PLAYGROUND"."ORA2GEOJSON" AS
+  CREATE OR REPLACE PACKAGE BODY "ORA2GEOJSON" AS
   FUNCTION get_row_properties (p_select VARCHAR2, RID ROWID) RETURN clob AS
   TYPE curtype IS REF CURSOR;
   src_cur      curtype;

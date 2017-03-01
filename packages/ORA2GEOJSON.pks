@@ -2,7 +2,7 @@
 --  DDL for Package ORA2GEOJSON
 --------------------------------------------------------
 
-  CREATE OR REPLACE PACKAGE "PLAYGROUND"."ORA2GEOJSON" AS
+  CREATE OR REPLACE PACKAGE "ORA2GEOJSON" AS
 
   FUNCTION get_row_properties (p_select VARCHAR2, RID ROWID) RETURN clob deterministic;
   FUNCTION sdo2geojson(p_select VARCHAR2,
