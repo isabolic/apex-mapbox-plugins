@@ -1,4 +1,4 @@
-Oracle apex plugins for & mapbox API
+Oracle apex plugins for mapbox
 - install:
 - compile packages APEX_PLUGIN_PKG
 - run install sql scripts for apex (region_xxx and item_xxx)
