@@ -33,11 +33,11 @@ wwv_flow_api.create_plugin(
 ,p_name=>'MAPBOXINCLUDEAPI'
 ,p_display_name=>'mapBoxIncludeAPI'
 ,p_supported_ui_types=>'DESKTOP:JQM_SMARTPHONE'
-,p_javascript_file_urls=>'http://playground/ws/mapbox.init.js'
-,p_render_function=>'apex_plugin_pkg.MAPBOX_INCLUDE'
+,p_render_function=>'ax_plg_mapbox.MAPBOX_INCLUDE'
 ,p_substitute_attributes=>true
 ,p_subscribe_plugin_settings=>true
 ,p_version_identifier=>'1.0'
+,p_files_version=>3
 );
 wwv_flow_api.create_plugin_attribute(
  p_id=>wwv_flow_api.id(1871126532301690)
@@ -49,6 +49,23 @@ wwv_flow_api.create_plugin_attribute(
 ,p_attribute_type=>'TEXT'
 ,p_is_required=>false
 ,p_is_translatable=>false
+);
+end;
+/
+begin
+wwv_flow_api.g_varchar2_table := wwv_flow_api.empty_varchar2_table;
+wwv_flow_api.g_varchar2_table(1) := '2F2F20776F726B73706163650A77696E646F772E617065782E706C7567696E73203D207B7D3B0A77696E646F772E617065782E706C7567696E732E6D6170626F78203D207B7D3B0A0A';
+null;
+end;
+/
+begin
+wwv_flow_api.create_plugin_file(
+ p_id=>wwv_flow_api.id(12002252832355256)
+,p_plugin_id=>wwv_flow_api.id(1870622301243709)
+,p_file_name=>'mapbox.init.js'
+,p_mime_type=>'text/javascript'
+,p_file_charset=>'utf-8'
+,p_file_content=>wwv_flow_api.varchar2_to_blob(wwv_flow_api.g_varchar2_table)
 );
 end;
 /
