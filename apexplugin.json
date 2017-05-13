@@ -1,11 +1,11 @@
 {
   "name" : "mapBoxRegion",
   "version" : "0.0.1",
-  "description" : " several mapbox plugins for more info => https://github.com/isabolic/apex-plugins/",
+  "description" : " several mapbox plugins for more info => https://github.com/isabolic/apex-mapbox-plugins",
   "keywords" : ["mapbox", "gis", "maps"],
   "homepage" : "https://github.com/isabolic/apex-plugins",
   "bugs" : {
-    "url" : "https://github.com/isabolic/apex-plugins/issues",
+    "url" : "https://github.com/isabolic/apex-mapbox-plugins/issues",
     "email" : "sabolic.ivan@gmail.com"
   },
   "license" : "MIT",
@@ -16,7 +16,7 @@
   },
   "repository" : {
     "type" : "git",
-    "url" : "https://github.com/isabolic/apex-plugins"
+    "url" : "https://github.com/isabolic/apex-mapbox-plugins"
   },
  "oracle" : {
     "versions" : ["11.2.0.1", "12.1.0.1"],
@@ -26,7 +26,7 @@
         "internalName" : "MAPBOXREGION",
         "type" : "region",
         "demo" : "https://apex.oracle.com/pls/apex/f?p=101959:2",
-        "previewImage" : "https://raw.githubusercontent.com/isabolic/apex-plugins/master/mapbox.region.png"       
+        "previewImage" : "https://raw.githubusercontent.com/isabolic/apex-plugins/master/mapbox.region.png"
       }
     }
   }
