@@ -1,8 +1,8 @@
 --------------------------------------------------------
---  DDL for Package Body APEX_PLUGIN_PKG
+--  DDL for Package Body AX_PLG_MAPBOX
 --------------------------------------------------------
 
-  CREATE OR REPLACE PACKAGE BODY "APEX_PLUGIN_PKG"
+  CREATE OR REPLACE PACKAGE BODY "AX_PLG_MAPBOX"
 as
 
     gv_playground_host varchar2(100) := 'PLAYGROUND';
@@ -266,6 +266,8 @@ as
                         p_directory => p_plugin.file_prefix );
             end if;
 
+
+
             v_exe_code := 'window.apex.plugins.mapbox.map = new apex.plugins.mapbox.mapBoxMap' ||
                 '({ mapRegionContainer:"' || v_region_id || ' .t-Region-body", ' ||
                 '   mapRegionId:"'  || v_region_id || '",'                       ||
@@ -314,7 +316,111 @@ as
         return v_ax_plg;
     end mapbox_include;
 
+    function mapbox_zoom_lvl_ctrl (
+        p_item                in apex_plugin.t_page_item,
+        p_plugin              in apex_plugin.t_plugin,
+        p_value               in varchar2,
+        p_is_readonly         in boolean,
+        p_is_printer_friendly in boolean )
+        return apex_plugin.t_page_item_render_result
+        is
+        --
+        v_ax_plg    apex_plugin.t_page_item_render_result;
+        v_exe_code  clob;
+        v_region_id varchar2(200);
+        --
+    begin
+        v_region_id := p_item.attribute_02;
 
-end apex_plugin_pkg;
+        if f_is_playground = false then
+            apex_javascript.add_library(p_name           => 'mapbox.zoom.level.control',
+                                        p_directory      => p_plugin.file_prefix,
+                                        p_version        => NULL,
+                                        p_skip_extension => FALSE);
+        end if;
+
+
+        v_exe_code := 'window.apex.plugins.mapbox.mapboxZoomLvlCtrl = new apex.plugins.mapbox.mapboxZoomLvlCtrl' ||
+                '({   mapRegionId:"'  || v_region_id || '" });';
+
+        apex_javascript.add_onload_code(
+           p_code => v_exe_code
+        );
+
+        return v_ax_plg;
+    end mapbox_zoom_lvl_ctrl;
+
+    function mapbox_load_layer_process(
+        p_process             in apex_plugin.t_process,
+        p_plugin              in apex_plugin.t_plugin)
+        return apex_plugin.t_process_exec_result
+        is
+            v_result        apex_plugin.t_process_exec_result;
+            v_geojson       clob;
+            v_data_type     varchar2(200);
+            v_cursor        SYS_REFCURSOR;
+            ex_invalid_type EXCEPTION;
+            --
+            v_owner        varchar2(40)    := p_process.attribute_01;
+            v_table        varchar2(40)    := p_process.attribute_02;
+            v_column       varchar2(40)    := p_process.attribute_03;
+            v_col_is_gjson varchar2(1)     := p_process.attribute_04;
+            v_query_sdo    varchar2(32000) :=
+                    'select ora2geojson.sdo2geojson(''select * from #USER#.#TABLE#''
+                                       ,rowid
+                                       ,#COLUMN#) geom
+                       from #USER#.#TABLE# t';
+            v_query_json varchar2(32000) :=
+                    'select #COLUMN#
+                       from #USER#.#TABLE# t';
+    begin
+
+        select atc.data_type
+          into v_data_type
+          from all_tab_columns atc left join all_synonyms s
+               on (atc.owner = s.table_owner and atc.table_name = s.table_name)
+         where 1=1
+           and atc.table_name = v_table
+           and atc.column_name = v_column
+           and (atc.owner = v_owner or s.owner = v_owner)
+         order by atc.owner, atc.table_name;
+
+        if v_data_type = 'SDO_GEOMETRY' and v_col_is_gjson = 'N' then
+
+            v_query_sdo := replace(v_query_sdo, '#USER#'     , v_owner );
+            v_query_sdo := replace(v_query_sdo, '#TABLE#'    , v_table );
+            v_query_sdo := replace(v_query_sdo, '#COLUMN#'   , v_column);
+
+
+            OPEN v_cursor for v_query_sdo;
+
+        elsif v_col_is_gjson = 'Y' and v_data_type != 'SDO_GEOMETRY' then
+            v_query_json := replace(v_query_json, '#USER#'     , v_owner );
+            v_query_json := replace(v_query_json, '#TABLE#'    , v_table );
+            v_query_json := replace(v_query_json, '#COLUMN#'   , v_column);
+
+
+        OPEN v_cursor for v_query_sdo;
+
+        elsif v_col_is_gjson = 'N' then
+            raise ex_invalid_type;
+        end if;
+
+        LOOP
+
+           FETCH v_cursor INTO v_geojson;
+           EXIT WHEN v_cursor%NOTFOUND;
+           res_out(v_geojson);
+        END LOOP;
+
+
+        v_result.success_message := 'OK';
+
+        return v_result;
+    end mapbox_load_layer_process;
+
+
+
+end ax_plg_mapbox;
 
 /

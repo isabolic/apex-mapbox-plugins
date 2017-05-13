@@ -1,8 +1,8 @@
 --------------------------------------------------------
---  DDL for Package APEX_PLUGIN_PKG
+--  DDL for Package AX_PLG_MAPBOX
 --------------------------------------------------------
 
-  CREATE OR REPLACE PACKAGE "APEX_PLUGIN_PKG"
+  CREATE OR REPLACE PACKAGE "AX_PLG_MAPBOX"
 as
     function f_is_playground return boolean;
 
@@ -34,6 +34,20 @@ as
         p_is_readonly         in boolean,
         p_is_printer_friendly in boolean )
         return apex_plugin.t_page_item_render_result;
-end apex_plugin_pkg;
+
+    function mapbox_zoom_lvl_ctrl (
+        p_item                in apex_plugin.t_page_item,
+        p_plugin              in apex_plugin.t_plugin,
+        p_value               in varchar2,
+        p_is_readonly         in boolean,
+        p_is_printer_friendly in boolean )
+        return apex_plugin.t_page_item_render_result;
+
+    function mapbox_load_layer_process(
+        p_process             in apex_plugin.t_process,
+        p_plugin              in apex_plugin.t_plugin)
+        return apex_plugin.t_process_exec_result;
+
+end ax_plg_mapbox;
 
 /
