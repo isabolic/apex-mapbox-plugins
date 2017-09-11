@@ -158,6 +158,13 @@ as
             v_query_sdo  := v_query_sdo || v_where;
         end if;
 
+        if v_owner is null then
+        select max(owner)
+          into v_owner
+          from apex_applications
+          where application_id = apex_application.g_flow_id;
+        end if;
+
         select atc.data_type
           into v_data_type
           from all_tab_columns atc left join all_synonyms s
