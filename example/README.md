@@ -1,5 +1,4 @@
-
-## Oracle apex plugins for mapbox - example
+## Oracle apex application example for mapbox plugins
 In your apex workspace:
 1) [X] select import application and select to **f115.sql** file
 2) [X] for **"File type"** select **"Database Application, Page or Component Export"**
